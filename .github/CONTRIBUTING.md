@@ -15,13 +15,13 @@ Thank you for your interest in contributing to Dynamic Power Plan! This document
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/dynamic-power-plan.git
-   cd dynamic-power-plan
+   git clone https://github.com/YOUR_USERNAME/DynamicPowerPlan.git
+   cd DynamicPowerPlan
    ```
 
 3. Install dependencies:
    ```bash
-   pip install pystray pillow psutil gputil
+   pip install -r requirements.txt
    ```
 
 4. Run the application:

@@ -71,9 +71,9 @@ If you don't have Lian Li fans, set "enableFanBoost": false in config.json
 GPU SUPPORT
 -----------
 The app automatically detects your GPU(s):
-  - NVIDIA: Works out of the box with nvidia-smi
-  - AMD: Install pyadl for best results (pip install pyadl)
-  - Intel: Uses Windows Performance Counters
+  - NVIDIA: Works out of the box
+  - AMD: Works out of the box
+  - Intel: Works out of the box
 
 If you have multiple GPUs, the app uses the highest utilization.
 
@@ -85,10 +85,5 @@ Check the logs folder for troubleshooting. The app logs:
   - Fan profile changes
   - Any errors encountered
 
-
-NEED HELP?
-----------
-See README.md for detailed documentation.
-Report issues at: https://github.com/YOUR-REPO/issues
 
 ================================================================================
