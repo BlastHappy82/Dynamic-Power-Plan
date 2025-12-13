@@ -35,6 +35,7 @@ jobs:
         copy dist\DynamicPowerPlan.exe dist\DynamicPowerPlan\
         copy config.json dist\DynamicPowerPlan\
         copy INSTRUCTIONS.txt dist\DynamicPowerPlan\
+        copy LICENSE dist\DynamicPowerPlan\
         xcopy MB_on dist\DynamicPowerPlan\MB_on\ /E /I
         xcopy MB_off dist\DynamicPowerPlan\MB_off\ /E /I
         xcopy backup dist\DynamicPowerPlan\backup\ /E /I
