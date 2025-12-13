@@ -2,10 +2,13 @@ import os
 import shutil
 import subprocess
 import logging
+import platform
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+SUBPROCESS_FLAGS = subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0
 
 
 class PowerManager:
@@ -39,7 +42,8 @@ class PowerManager:
                 ['powercfg', '/getactivescheme'],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                creationflags=SUBPROCESS_FLAGS
             )
             if result.returncode == 0:
                 output = result.stdout.strip()
@@ -61,7 +65,8 @@ class PowerManager:
                 ['powercfg', '/list'],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                creationflags=SUBPROCESS_FLAGS
             )
             
             plan_guid = None
@@ -83,7 +88,8 @@ class PowerManager:
                 ['powercfg', '/setactive', plan_guid],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                creationflags=SUBPROCESS_FLAGS
             )
             
             if result.returncode == 0:
@@ -143,13 +149,15 @@ class PowerManager:
             subprocess.run(
                 ['net', 'stop', service_name],
                 capture_output=True,
-                timeout=10
+                timeout=10,
+                creationflags=SUBPROCESS_FLAGS
             )
             
             subprocess.run(
                 ['net', 'start', service_name],
                 capture_output=True,
-                timeout=10
+                timeout=10,
+                creationflags=SUBPROCESS_FLAGS
             )
             
             logger.info(f"Restarted service: {service_name}")

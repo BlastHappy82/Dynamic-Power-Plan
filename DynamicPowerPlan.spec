@@ -42,4 +42,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='Resources/tray_normal.ico',
+    uac_admin=True,
 )
