@@ -7,6 +7,7 @@ a = Analysis(
     datas=[
         ('Resources/tray_normal.ico', 'Resources'),
         ('Resources/tray_boost.ico', 'Resources'),
+        ('INSTRUCTIONS.txt', '.'),
     ],
     hiddenimports=[
         'pystray._win32',
