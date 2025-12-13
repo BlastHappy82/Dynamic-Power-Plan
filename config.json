@@ -1,0 +1,38 @@
+{
+  "plans": {
+    "normal": "Everyday",
+    "boost": "High Performance"
+  },
+  "thresholds": {
+    "cpuPercent": 70,
+    "gpuPercent": 70,
+    "promoteHoldSeconds": 5,
+    "demoteHoldSeconds": 15
+  },
+  "sampling": {
+    "intervalMs": 1000
+  },
+  "games": {
+    "watch": [
+      "cod.exe",
+      "bf2042.exe",
+      "fortniteclient-win64-shipping.exe"
+    ]
+  },
+  "gpuSampler": {
+    "preferNvidiaSMI": true,
+    "nvidiaSmiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+  },
+  "lconnect": {
+    "enableFanBoost": true,
+    "serviceName": "LConnectService",
+    "targetFile": "C:\\ProgramData\\Lian-Li\\L-Connect 3\\settings\\L-Connect-Service",
+    "mbOnDir": ".\\MB_on",
+    "mbOffDir": ".\\MB_off",
+    "backupFile": ".\\backup\\lconnect_original_backup.bin"
+  },
+  "logging": {
+    "logDir": ".\\logs",
+    "verbosity": "info"
+  }
+}
