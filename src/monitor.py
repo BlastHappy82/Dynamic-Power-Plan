@@ -7,6 +7,8 @@ from typing import Optional, Tuple, List, Callable
 from threading import Thread, Event
 from enum import Enum
 
+SUBPROCESS_FLAGS = subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0
+
 GPUtil = None
 GPUTIL_AVAILABLE = False
 try:
@@ -71,7 +73,7 @@ class SystemMonitor:
             try:
                 result = subprocess.run(
                     [self.config.nvidia_smi_path, '--query-gpu=name', '--format=csv,noheader'],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True, text=True, timeout=5, creationflags=SUBPROCESS_FLAGS
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     return True
@@ -100,7 +102,7 @@ class SystemMonitor:
                 result = subprocess.run(
                     ['powershell', '-Command', 
                      "Get-WmiObject Win32_VideoController | Where-Object { $_.Name -like '*AMD*' -or $_.Name -like '*Radeon*' } | Select-Object -First 1 Name"],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True, text=True, timeout=5, creationflags=SUBPROCESS_FLAGS
                 )
                 return result.returncode == 0 and ('AMD' in result.stdout or 'Radeon' in result.stdout)
             except Exception:
@@ -114,7 +116,7 @@ class SystemMonitor:
                 result = subprocess.run(
                     ['powershell', '-Command', 
                      "Get-WmiObject Win32_VideoController | Where-Object { $_.Name -like '*Intel*' } | Select-Object -First 1 Name"],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True, text=True, timeout=5, creationflags=SUBPROCESS_FLAGS
                 )
                 return result.returncode == 0 and 'Intel' in result.stdout
             except Exception:
@@ -156,7 +158,7 @@ class SystemMonitor:
             try:
                 result = subprocess.run(
                     [self.config.nvidia_smi_path, '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True, text=True, timeout=5, creationflags=SUBPROCESS_FLAGS
                 )
                 if result.returncode == 0:
                     lines = result.stdout.strip().split('\n')
@@ -237,7 +239,7 @@ try {{
 """
             result = subprocess.run(
                 ['powershell', '-Command', ps_script],
-                capture_output=True, text=True, timeout=10
+                capture_output=True, text=True, timeout=10, creationflags=SUBPROCESS_FLAGS
             )
             if result.returncode == 0 and result.stdout.strip():
                 try:
