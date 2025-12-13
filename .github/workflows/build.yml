@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build and Release
 
 on:
   push:
@@ -9,55 +9,42 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pyinstaller
-    
-    - name: Build executable
-      run: pyinstaller --clean DynamicPowerPlan.spec
-    
-    - name: Create distribution package
-      run: |
-        mkdir dist\DynamicPowerPlan
-        copy dist\DynamicPowerPlan.exe dist\DynamicPowerPlan\
-        copy config.json dist\DynamicPowerPlan\
-        copy INSTRUCTIONS.txt dist\DynamicPowerPlan\
-        copy LICENSE dist\DynamicPowerPlan\
-        xcopy MB_on dist\DynamicPowerPlan\MB_on\ /E /I
-        xcopy MB_off dist\DynamicPowerPlan\MB_off\ /E /I
-        xcopy backup dist\DynamicPowerPlan\backup\ /E /I
-    
-    - name: Create ZIP for release
-      run: |
-        Compress-Archive -Path dist\DynamicPowerPlan\* -DestinationPath dist\DynamicPowerPlan-Windows.zip
-      shell: pwsh
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: DynamicPowerPlan-Windows
-        path: dist/DynamicPowerPlan/
-        retention-days: 30
-    
-    - name: Create Release (on tag)
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist/DynamicPowerPlan-Windows.zip
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable
+        run: pyinstaller DynamicPowerPlan.spec
+
+      - name: Create zip package
+        run: |
+          mkdir dist\DynamicPowerPlan
+          copy dist\DynamicPowerPlan.exe dist\DynamicPowerPlan\
+          copy config.json dist\DynamicPowerPlan\
+          copy INSTRUCTIONS.txt dist\DynamicPowerPlan\
+          copy LICENSE dist\DynamicPowerPlan\
+          copy RELEASE_NOTES.md dist\DynamicPowerPlan\
+          xcopy MB_on dist\DynamicPowerPlan\MB_on\ /E /I
+          xcopy MB_off dist\DynamicPowerPlan\MB_off\ /E /I
+          xcopy backup dist\DynamicPowerPlan\backup\ /E /I
+          Compress-Archive -Path dist\DynamicPowerPlan -DestinationPath dist\DynamicPowerPlan.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Dynamic Power Plan ${{ github.ref_name }}"
+          body_path: RELEASE_NOTES.md
+          files: dist/DynamicPowerPlan.zip
