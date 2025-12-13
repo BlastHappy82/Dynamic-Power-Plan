@@ -29,7 +29,7 @@ A Windows system tray application that automatically switches power plans and Li
 2. Clone or download this repository
 3. Install dependencies:
    ```bash
-   pip install pystray pillow psutil gputil pyadl
+   pip install -r requirements.txt
    ```
 4. Run the application (as Administrator):
    ```bash
@@ -141,7 +141,7 @@ The application automatically detects and monitors GPUs from multiple vendors:
 
 **Notes:**
 - NVIDIA: Install the NVIDIA driver (nvidia-smi is included)
-- AMD: Install `pyadl` (`pip install pyadl`) for best accuracy
+- AMD: Supported out of the box
 - Intel: Works automatically on Windows 10/11
 - Multi-GPU: Returns maximum utilization across all detected GPUs
 
@@ -161,7 +161,8 @@ To create a standalone executable:
 
 1. Install Python 3.11+ and dependencies:
    ```bash
-   pip install pystray pillow psutil gputil pyadl pyinstaller
+   pip install -r requirements.txt
+   pip install pyinstaller
    ```
 2. Build the executable:
    ```bash
@@ -195,7 +196,7 @@ DynamicPowerPlan/
 
 ### GPU not detected
 - NVIDIA: Install the latest NVIDIA driver
-- AMD: Install pyadl: `pip install pyadl`
+- AMD: Supported out of the box
 - Check the logs folder for error messages
 
 ### L-Connect fan profiles not working

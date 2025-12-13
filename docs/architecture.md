@@ -194,6 +194,6 @@ The monitor thread communicates state changes via callback, which runs on the mo
 ## Error Handling
 
 - Config loading: Falls back to defaults if file is corrupt
-- GPU monitoring: Falls back to GPUtil if nvidia-smi unavailable
+- GPU monitoring: Multi-vendor support (NVIDIA, AMD, Intel) with automatic fallbacks
 - Power plan: Logs errors but continues operation
 - File copying: Logs errors, doesn't crash application

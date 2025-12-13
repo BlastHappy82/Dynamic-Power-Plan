@@ -38,9 +38,14 @@ python main.py --config "C:\path\to\my-config.json"
       "fortniteclient-win64-shipping.exe"
     ]
   },
-  "gpuSampler": {
-    "preferNvidiaSMI": true,
-    "nvidiaSmiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+  "gpu": {
+    "nvidia": {
+      "preferSMI": true,
+      "smiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+    },
+    "amd": {
+      "preferPyadl": true
+    }
   },
   "lconnect": {
     "enableFanBoost": true,
@@ -113,19 +118,30 @@ Executables that immediately trigger boost mode.
 3. Right-click → Properties
 4. Note the exact filename (e.g., `cod.exe`)
 
-### gpuSampler
+### gpu
 
-GPU monitoring configuration.
+GPU monitoring configuration for multiple vendors.
+
+#### gpu.nvidia
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `preferNvidiaSMI` | boolean | true | Use nvidia-smi for GPU monitoring |
-| `nvidiaSmiPath` | string | System32 path | Path to nvidia-smi.exe |
+| `preferSMI` | boolean | true | Use nvidia-smi for GPU monitoring (recommended) |
+| `smiPath` | string | System32 path | Path to nvidia-smi.exe |
+
+#### gpu.amd
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `preferPyadl` | boolean | true | Use pyadl library for AMD GPU monitoring |
 
 **GPU Monitoring Priority:**
-1. nvidia-smi (more accurate, NVIDIA only)
-2. GPUtil library (fallback)
-3. 0% if neither available
+
+| GPU Vendor | Primary Method | Fallback Method |
+|------------|----------------|-----------------|
+| NVIDIA | nvidia-smi | GPUtil library |
+| AMD | pyadl library | Windows Performance Counters |
+| Intel | Windows Performance Counters | - |
 
 ### lconnect
 
