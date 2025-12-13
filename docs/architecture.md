@@ -130,7 +130,7 @@ System tray icon and menu using pystray.
 - `TrayApp` class: Main UI controller
 - Icon management (normal/boost states)
 - Menu creation and callbacks
-- Windows registry for startup option
+- Task Scheduler for startup option (runs with admin privileges)
 
 **Menu Structure:**
 ```

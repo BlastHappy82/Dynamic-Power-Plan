@@ -19,7 +19,7 @@ Automatically switches Windows power plans based on CPU/GPU load.
 
 ## Bug Fixes
 
-- Fixed "Start with Windows" not working when installed in paths with spaces
+- Fixed "Start with Windows" not working for admin apps (now uses Task Scheduler instead of registry)
 
 ## Requirements
 

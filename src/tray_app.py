@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from pathlib import Path
 from threading import Thread
@@ -131,37 +132,40 @@ class TrayApp:
         if os.name != 'nt':
             return False
         
-        import winreg
         try:
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_READ
+            result = subprocess.run(
+                ['schtasks', '/query', '/tn', 'DynamicPowerPlan'],
+                capture_output=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
-            winreg.QueryValueEx(key, "DynamicPowerPlan")
-            winreg.CloseKey(key)
-            return True
-        except WindowsError:
+            return result.returncode == 0
+        except Exception:
             return False
     
     def _enable_startup(self):
         if os.name != 'nt':
             return
         
-        import winreg
         try:
             if hasattr(sys, 'frozen'):
-                exe_path = f'"{sys.executable}"'
+                task_command = f'"{sys.executable}"'
             else:
-                exe_path = f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+                task_command = f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
             
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_SET_VALUE
+            self._disable_startup()
+            
+            subprocess.run(
+                [
+                    'schtasks', '/create',
+                    '/tn', 'DynamicPowerPlan',
+                    '/tr', task_command,
+                    '/sc', 'onlogon',
+                    '/rl', 'highest',
+                    '/f'
+                ],
+                capture_output=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
-            winreg.SetValueEx(key, "DynamicPowerPlan", 0, winreg.REG_SZ, exe_path)
-            winreg.CloseKey(key)
         except Exception as e:
             print(f"Error enabling startup: {e}")
     
@@ -169,15 +173,12 @@ class TrayApp:
         if os.name != 'nt':
             return
         
-        import winreg
         try:
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_SET_VALUE
+            subprocess.run(
+                ['schtasks', '/delete', '/tn', 'DynamicPowerPlan', '/f'],
+                capture_output=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
-            winreg.DeleteValue(key, "DynamicPowerPlan")
-            winreg.CloseKey(key)
         except Exception:
             pass
     
