@@ -67,3 +67,5 @@ docs/_build/
 # Replit files
 replit.md
 attached_assets/
+
+build.yml

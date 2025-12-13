@@ -25,9 +25,14 @@ DEFAULT_CONFIG = {
             "fortniteclient-win64-shipping.exe"
         ]
     },
-    "gpuSampler": {
-        "preferNvidiaSMI": True,
-        "nvidiaSmiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+    "gpu": {
+        "nvidia": {
+            "preferSMI": True,
+            "smiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+        },
+        "amd": {
+            "preferPyadl": True
+        }
     },
     "lconnect": {
         "enableFanBoost": True,
@@ -146,11 +151,25 @@ class Config:
     
     @property
     def prefer_nvidia_smi(self) -> bool:
-        return self._config['gpuSampler']['preferNvidiaSMI']
+        if 'gpuSampler' in self._config and 'preferNvidiaSMI' in self._config['gpuSampler']:
+            return self._config['gpuSampler']['preferNvidiaSMI']
+        if 'gpu' in self._config and 'nvidia' in self._config['gpu']:
+            return self._config['gpu']['nvidia'].get('preferSMI', True)
+        return True
     
     @property
     def nvidia_smi_path(self) -> str:
-        return self._config['gpuSampler']['nvidiaSmiPath']
+        if 'gpuSampler' in self._config and 'nvidiaSmiPath' in self._config['gpuSampler']:
+            return self._config['gpuSampler']['nvidiaSmiPath']
+        if 'gpu' in self._config and 'nvidia' in self._config['gpu']:
+            return self._config['gpu']['nvidia'].get('smiPath', 'C:\\Windows\\System32\\nvidia-smi.exe')
+        return 'C:\\Windows\\System32\\nvidia-smi.exe'
+    
+    @property
+    def prefer_amd_pyadl(self) -> bool:
+        if 'gpu' in self._config and 'amd' in self._config['gpu']:
+            return self._config['gpu']['amd'].get('preferPyadl', True)
+        return True
     
     @property
     def enable_fan_boost(self) -> bool:

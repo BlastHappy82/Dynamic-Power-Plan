@@ -19,9 +19,14 @@
       "fortniteclient-win64-shipping.exe"
     ]
   },
-  "gpuSampler": {
-    "preferNvidiaSMI": true,
-    "nvidiaSmiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+  "gpu": {
+    "nvidia": {
+      "preferSMI": true,
+      "smiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+    },
+    "amd": {
+      "preferPyadl": true
+    }
   },
   "lconnect": {
     "enableFanBoost": true,

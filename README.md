@@ -26,7 +26,7 @@ A Windows system tray application that automatically switches power plans and Li
 2. Clone or download this repository
 3. Install dependencies:
    ```bash
-   pip install pystray pillow psutil gputil
+   pip install pystray pillow psutil gputil pyadl
    ```
 4. Run the application:
    ```bash
@@ -55,6 +55,15 @@ Edit `config.json` to customize the application:
       "bf2042.exe",
       "your-game.exe"
     ]
+  },
+  "gpu": {
+    "nvidia": {
+      "preferSMI": true,
+      "smiPath": "C:\\Windows\\System32\\nvidia-smi.exe"
+    },
+    "amd": {
+      "preferPyadl": true
+    }
   }
 }
 ```
@@ -70,6 +79,9 @@ Edit `config.json` to customize the application:
 | `thresholds.promoteHoldSeconds` | Seconds of sustained high usage before switching to boost |
 | `thresholds.demoteHoldSeconds` | Seconds of sustained low usage before switching back to normal |
 | `games.watch` | List of executable names that trigger boost mode when running |
+| `gpu.nvidia.preferSMI` | Use nvidia-smi for NVIDIA GPU monitoring (recommended) |
+| `gpu.nvidia.smiPath` | Path to nvidia-smi.exe |
+| `gpu.amd.preferPyadl` | Use pyadl library for AMD GPU monitoring (recommended) |
 
 ## System Tray Menu
 
@@ -98,7 +110,23 @@ Right-click the tray icon to access:
 
 - Windows 10/11
 - Lian Li L-Connect 3 (for fan control features)
-- NVIDIA GPU with nvidia-smi (optional, for GPU monitoring)
+
+### GPU Monitoring Support
+
+The application automatically detects and monitors GPUs from multiple vendors:
+
+| GPU Vendor | Primary Method | Fallback Method |
+|------------|----------------|-----------------|
+| **NVIDIA** | nvidia-smi command | GPUtil library |
+| **AMD** | pyadl library | Windows Performance Counters (aggregate) |
+| **Intel** | Windows Performance Counters | - |
+
+For best results:
+- **NVIDIA**: Install the NVIDIA driver (nvidia-smi is included) - most accurate monitoring
+- **AMD**: Install the `pyadl` library (`pip install pyadl`) for per-adapter accuracy. Without pyadl, falls back to aggregate 3D GPU usage
+- **Intel**: Uses Windows Performance Counters automatically on Windows 10/11
+
+**Note**: On systems with multiple GPU vendors, the application returns the maximum utilization across all detected GPUs
 
 ## Building from Source
 
