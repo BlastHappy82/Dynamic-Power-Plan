@@ -17,6 +17,10 @@ Automatically switches Windows power plans based on CPU/GPU load.
 2. Run `DynamicPowerPlan.exe`
 3. Right-click the tray icon to access settings
 
+## Bug Fixes
+
+- Fixed "Start with Windows" not working when installed in paths with spaces
+
 ## Requirements
 
 - Windows 10/11

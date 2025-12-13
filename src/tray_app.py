@@ -150,9 +150,8 @@ class TrayApp:
         
         import winreg
         try:
-            exe_path = sys.executable
             if hasattr(sys, 'frozen'):
-                exe_path = sys.executable
+                exe_path = f'"{sys.executable}"'
             else:
                 exe_path = f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
             
