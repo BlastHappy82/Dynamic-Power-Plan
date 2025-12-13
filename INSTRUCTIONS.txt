@@ -1,0 +1,94 @@
+================================================================================
+                         DYNAMIC POWER PLAN TRAY
+                            Quick Start Guide
+================================================================================
+
+WHAT THIS APP DOES
+------------------
+Automatically switches your Windows power plan and Lian Li fan speeds based on
+CPU/GPU usage. When you're gaming or doing heavy work, it boosts performance.
+When you're idle, it saves power.
+
+
+FIRST TIME SETUP
+----------------
+1. Extract the ZIP to any folder (your Dropbox, Documents, wherever you like)
+
+2. Double-click DynamicPowerPlan.exe
+
+3. Click "Yes" on the Windows security prompt (admin rights are needed to
+   change power plans)
+
+4. Look for the new icon in your system tray (bottom-right of your screen)
+
+5. That's it! The app is now running and monitoring your system.
+
+
+SYSTEM TRAY MENU
+----------------
+Right-click the tray icon to see:
+
+  - Current CPU and GPU usage percentages
+  - Current mode (Boost or Normal)
+  - Manual mode switches (High Performance / Everyday / Auto)
+  - Start with Windows toggle
+  - Open Config File
+  - Exit
+
+
+CONFIGURATION
+-------------
+Edit config.json (in the same folder as the exe) to customize:
+
+  - Power plan names (must match your Windows power plans)
+  - CPU/GPU thresholds (default: 70%)
+  - Hold times before switching (prevents rapid toggling)
+  - Games to watch (boost mode triggers when these are running)
+  - L-Connect fan profile settings
+
+
+POWER PLAN NAMES
+----------------
+By default, the app looks for power plans named:
+  - "Everyday" (normal mode)
+  - "High Performance" (boost mode)
+
+To see your available power plans, open Command Prompt and run:
+  powercfg /list
+
+Then update the names in config.json to match.
+
+
+FAN PROFILES (LIAN LI)
+----------------------
+The MB_on and MB_off folders contain L-Connect fan profiles:
+  - MB_on = Full speed fans (used during boost)
+  - MB_off = Normal fans (used during normal mode)
+
+If you don't have Lian Li fans, set "enableFanBoost": false in config.json
+
+
+GPU SUPPORT
+-----------
+The app automatically detects your GPU(s):
+  - NVIDIA: Works out of the box with nvidia-smi
+  - AMD: Install pyadl for best results (pip install pyadl)
+  - Intel: Uses Windows Performance Counters
+
+If you have multiple GPUs, the app uses the highest utilization.
+
+
+LOGS
+----
+Check the logs folder for troubleshooting. The app logs:
+  - Power plan changes
+  - Fan profile changes
+  - Any errors encountered
+
+
+NEED HELP?
+----------
+See README.md for detailed documentation.
+Report issues at: https://github.com/YOUR-REPO/issues
+
+================================================================================

@@ -4,21 +4,24 @@ A Windows system tray application that automatically switches power plans and Li
 
 ## Features
 
-- **Automatic Power Plan Switching**: Monitors CPU and GPU usage and switches between "Everyday" and "High Performance" power plans when thresholds are exceeded
-- **Lian Li Fan Control**: Automatically copies fan configuration files to L-Connect 3 to switch between normal and full-speed fan modes
-- **Game Detection**: Watches for specific executables and triggers high performance mode when games are running
+- **Automatic Power Plan Switching**: Monitors CPU and GPU usage and switches between power plans when thresholds are exceeded
+- **Multi-GPU Support**: Detects and monitors NVIDIA, AMD, and Intel GPUs automatically
+- **Lian Li Fan Control**: Integrates with L-Connect 3 to switch fan profiles
+- **Game Detection**: Watches for specific executables and triggers boost mode automatically
 - **System Tray Interface**: Clean tray icon with right-click menu for manual control
-- **Configurable Thresholds**: Customize CPU/GPU thresholds, hold times, and watched applications via JSON config
+- **Configurable Thresholds**: Customize CPU/GPU thresholds, hold times, and watched games
 - **Start with Windows**: Option to run automatically at Windows startup
+- **Admin Elevation**: Automatically requests admin rights for power plan changes
 
 ## Quick Start
 
 ### Option 1: Download Pre-built Release
 
 1. Download the latest release from [GitHub Releases](../../releases)
-2. Extract the ZIP to a folder of your choice
+2. Extract the ZIP to a folder of your choice (e.g., your Dropbox folder for portability)
 3. Double-click `DynamicPowerPlan.exe`
-4. The tray icon appears - you're done!
+4. Click "Yes" on the UAC prompt (admin rights required)
+5. The tray icon appears - you're done!
 
 ### Option 2: Run from Source
 
@@ -28,14 +31,16 @@ A Windows system tray application that automatically switches power plans and Li
    ```bash
    pip install pystray pillow psutil gputil pyadl
    ```
-4. Run the application:
+4. Run the application (as Administrator):
    ```bash
    python main.py
    ```
 
 ## Configuration
 
-Edit `config.json` to customize the application:
+Edit `config.json` to customize the application. The file is located in the same folder as the executable.
+
+### Example Configuration
 
 ```json
 {
@@ -49,11 +54,14 @@ Edit `config.json` to customize the application:
     "promoteHoldSeconds": 5,
     "demoteHoldSeconds": 15
   },
+  "sampling": {
+    "intervalMs": 1000
+  },
   "games": {
     "watch": [
       "cod.exe",
       "bf2042.exe",
-      "your-game.exe"
+      "fortniteclient-win64-shipping.exe"
     ]
   },
   "gpu": {
@@ -64,30 +72,39 @@ Edit `config.json` to customize the application:
     "amd": {
       "preferPyadl": true
     }
+  },
+  "lconnect": {
+    "enableFanBoost": true,
+    "serviceName": "LConnectService",
+    "targetFile": "C:\\ProgramData\\Lian-Li\\L-Connect 3\\settings\\L-Connect-Service",
+    "mbOnDir": ".\\MB_on",
+    "mbOffDir": ".\\MB_off"
   }
 }
 ```
 
 ### Configuration Options
 
-| Setting | Description |
-|---------|-------------|
-| `plans.normal` | Name of your normal/everyday power plan |
-| `plans.boost` | Name of your high performance power plan |
-| `thresholds.cpuPercent` | CPU usage threshold to trigger boost mode |
-| `thresholds.gpuPercent` | GPU usage threshold to trigger boost mode |
-| `thresholds.promoteHoldSeconds` | Seconds of sustained high usage before switching to boost |
-| `thresholds.demoteHoldSeconds` | Seconds of sustained low usage before switching back to normal |
-| `games.watch` | List of executable names that trigger boost mode when running |
-| `gpu.nvidia.preferSMI` | Use nvidia-smi for NVIDIA GPU monitoring (recommended) |
-| `gpu.nvidia.smiPath` | Path to nvidia-smi.exe |
-| `gpu.amd.preferPyadl` | Use pyadl library for AMD GPU monitoring (recommended) |
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `plans.normal` | Name of your normal/everyday power plan | "Everyday" |
+| `plans.boost` | Name of your high performance power plan | "High Performance" |
+| `thresholds.cpuPercent` | CPU usage threshold to trigger boost mode | 70 |
+| `thresholds.gpuPercent` | GPU usage threshold to trigger boost mode | 70 |
+| `thresholds.promoteHoldSeconds` | Seconds of sustained high usage before switching to boost | 5 |
+| `thresholds.demoteHoldSeconds` | Seconds of sustained low usage before switching back to normal | 15 |
+| `sampling.intervalMs` | How often to check CPU/GPU usage (milliseconds) | 1000 |
+| `games.watch` | List of executable names that trigger boost mode when running | [] |
+| `gpu.nvidia.preferSMI` | Use nvidia-smi for NVIDIA GPU monitoring | true |
+| `gpu.nvidia.smiPath` | Path to nvidia-smi.exe | System default |
+| `gpu.amd.preferPyadl` | Use pyadl library for AMD GPU monitoring | true |
+| `lconnect.enableFanBoost` | Enable Lian Li fan profile switching | true |
 
 ## System Tray Menu
 
 Right-click the tray icon to access:
 
-- **Status Display**: Current CPU/GPU usage and mode
+- **Status Display**: Current CPU/GPU usage and mode (Boost/Normal)
 - **High Performance**: Manually switch to boost mode
 - **Everyday (Normal)**: Manually switch to normal mode  
 - **Auto**: Return to automatic switching based on usage
@@ -97,19 +114,20 @@ Right-click the tray icon to access:
 
 ## How It Works
 
-1. The app monitors CPU and GPU usage at regular intervals
-2. When usage exceeds the threshold for the hold time, it:
+1. The app monitors CPU and GPU usage at regular intervals (default: 1 second)
+2. When usage exceeds the threshold for the "promote hold time", it:
    - Switches to the "High Performance" power plan via `powercfg`
-   - Copies the `MB_on` fan configuration to L-Connect 3 settings (full-speed fans)
-3. When usage drops below the threshold for the demote hold time, it:
+   - Copies the `MB_on` fan configuration to L-Connect 3 (full-speed fans)
+3. When usage drops below the threshold for the "demote hold time", it:
    - Switches back to the "Everyday" power plan
    - Copies the `MB_off` fan configuration (normal fans)
 4. If a watched game executable is detected running, boost mode is triggered immediately
 
 ## Requirements
 
-- Windows 10/11
-- Lian Li L-Connect 3 (for fan control features)
+- **Windows 10/11**
+- **Administrator rights** (for power plan switching)
+- **Lian Li L-Connect 3** (optional, for fan control features)
 
 ### GPU Monitoring Support
 
@@ -118,24 +136,36 @@ The application automatically detects and monitors GPUs from multiple vendors:
 | GPU Vendor | Primary Method | Fallback Method |
 |------------|----------------|-----------------|
 | **NVIDIA** | nvidia-smi command | GPUtil library |
-| **AMD** | pyadl library | Windows Performance Counters (aggregate) |
+| **AMD** | pyadl library | Windows Performance Counters |
 | **Intel** | Windows Performance Counters | - |
 
-For best results:
-- **NVIDIA**: Install the NVIDIA driver (nvidia-smi is included) - most accurate monitoring
-- **AMD**: Install the `pyadl` library (`pip install pyadl`) for per-adapter accuracy. Without pyadl, falls back to aggregate 3D GPU usage
-- **Intel**: Uses Windows Performance Counters automatically on Windows 10/11
+**Notes:**
+- NVIDIA: Install the NVIDIA driver (nvidia-smi is included)
+- AMD: Install `pyadl` (`pip install pyadl`) for best accuracy
+- Intel: Works automatically on Windows 10/11
+- Multi-GPU: Returns maximum utilization across all detected GPUs
 
-**Note**: On systems with multiple GPU vendors, the application returns the maximum utilization across all detected GPUs
+### Power Plan Setup
+
+The app expects power plans named "Everyday" and "High Performance" by default. To check your available power plans:
+
+```cmd
+powercfg /list
+```
+
+You can change the plan names in `config.json` to match your existing plans.
 
 ## Building from Source
 
 To create a standalone executable:
 
-1. Install Python 3.11+ and dependencies
-2. Run the build script:
+1. Install Python 3.11+ and dependencies:
    ```bash
-   build.bat
+   pip install pystray pillow psutil gputil pyadl pyinstaller
+   ```
+2. Build the executable:
+   ```bash
+   pyinstaller --clean DynamicPowerPlan.spec
    ```
 3. Find the executable in the `dist` folder
 
@@ -143,22 +173,35 @@ To create a standalone executable:
 
 ```
 DynamicPowerPlan/
-├── main.py              # Application entry point
-├── config.json          # User configuration
-├── src/
-│   ├── config.py        # Configuration management
-│   ├── monitor.py       # CPU/GPU monitoring
-│   ├── power_manager.py # Power plan switching
-│   └── tray_app.py      # System tray interface
-├── MB_on/               # Full-speed fan configuration
-├── MB_off/              # Normal fan configuration
-├── Resources/           # Tray icons
-└── docs/                # Documentation
+├── DynamicPowerPlan.exe  # Main executable
+├── config.json           # User configuration
+├── MB_on/                # Full-speed fan configuration
+│   └── L-Connect-Service
+├── MB_off/               # Normal fan configuration
+│   └── L-Connect-Service
+├── backup/               # Original L-Connect backup
+└── logs/                 # Application logs
 ```
 
-## Contributing
+## Troubleshooting
 
-See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
+### App doesn't start
+- Make sure you're running as Administrator
+- Check that Python dependencies are installed (if running from source)
+
+### Power plan doesn't change
+- Verify the power plan names in config.json match your system (`powercfg /list`)
+- Ensure you clicked "Yes" on the UAC prompt
+
+### GPU not detected
+- NVIDIA: Install the latest NVIDIA driver
+- AMD: Install pyadl: `pip install pyadl`
+- Check the logs folder for error messages
+
+### L-Connect fan profiles not working
+- Verify L-Connect 3 is installed
+- Check the target path in config.json matches your L-Connect installation
+- The MB_on and MB_off folders must contain valid L-Connect-Service files
 
 ## License
 
