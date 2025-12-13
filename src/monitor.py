@@ -11,18 +11,20 @@ GPUtil = None
 GPUTIL_AVAILABLE = False
 try:
     import GPUtil as _GPUtil
+    _GPUtil.getGPUs()
     GPUtil = _GPUtil
     GPUTIL_AVAILABLE = True
-except ImportError:
+except Exception:
     pass
 
 pyadl = None
 PYADL_AVAILABLE = False
 try:
     import pyadl as _pyadl
+    _pyadl.ADLManager.getInstance().getDevices()
     pyadl = _pyadl
     PYADL_AVAILABLE = True
-except ImportError:
+except Exception:
     pass
 
 
