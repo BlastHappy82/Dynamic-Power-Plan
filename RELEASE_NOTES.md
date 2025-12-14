@@ -1,4 +1,4 @@
-# Dynamic Power Plan v1.0.0
+# Dynamic Power Plan v1.0.1
 
 Automatically switches Windows power plans based on CPU/GPU load.
 
