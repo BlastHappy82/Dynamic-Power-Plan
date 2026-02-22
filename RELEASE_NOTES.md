@@ -1,4 +1,4 @@
-# Dynamic Power Plan v1.0.1
+# Dynamic Power Plan v1.0.2
 
 Automatically switches Windows power plans based on CPU/GPU load.
 
@@ -16,10 +16,6 @@ Automatically switches Windows power plans based on CPU/GPU load.
 1. Extract the zip to a folder of your choice
 2. Run `DynamicPowerPlan.exe`
 3. Right-click the tray icon to access settings
-
-## Bug Fixes
-
-- Fixed "Start with Windows" not working for admin apps (now uses Task Scheduler instead of registry)
 
 ## Improvements
 
