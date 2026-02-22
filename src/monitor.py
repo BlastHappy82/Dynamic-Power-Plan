@@ -52,6 +52,7 @@ class SystemMonitor:
         self._demote_start_time: Optional[float] = None
         
         self._on_state_change: Optional[Callable[[bool], None]] = None
+        self._on_verify: Optional[Callable[[bool], None]] = None
         
         self._detected_gpus: List[Tuple[GPUVendor, str]] = []
         self._detect_gpus()
@@ -129,6 +130,9 @@ class SystemMonitor:
     
     def set_state_change_callback(self, callback: Callable[[bool], None]):
         self._on_state_change = callback
+    
+    def set_verify_callback(self, callback: Callable[[bool], None]):
+        self._on_verify = callback
     
     def get_cpu_usage(self) -> float:
         return psutil.cpu_percent(interval=None)
@@ -323,11 +327,17 @@ try {{
     def _monitor_loop(self):
         psutil.cpu_percent(interval=None)
         
+        if self._on_verify:
+            self._on_verify(self._is_boosted)
+        
         while not self._stop_event.is_set():
             self._current_cpu = self.get_cpu_usage()
             self._current_gpu = self.get_gpu_usage()
             
             self._check_state_transition()
+            
+            if self._on_verify:
+                self._on_verify(self._is_boosted)
             
             self._stop_event.wait(self.config.sampling_interval_ms / 1000.0)
     

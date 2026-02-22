@@ -21,6 +21,10 @@ Automatically switches Windows power plans based on CPU/GPU load.
 
 - Fixed "Start with Windows" not working for admin apps (now uses Task Scheduler instead of registry)
 
+## Improvements
+
+- Added fan state recovery: the app now tracks fan profile state with on/off status files and verifies the correct fan config is applied on startup and after each state change, automatically recovering from unexpected shutdowns or crashes
+
 ## Requirements
 
 - Windows 10/11

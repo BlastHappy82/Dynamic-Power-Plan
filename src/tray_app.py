@@ -70,10 +70,15 @@ class TrayApp:
         self._icon_boost = load_icon_image(str(resources_dir / 'tray_boost.ico'), 'red')
         
         self.monitor.set_state_change_callback(self._on_state_change)
+        self.monitor.set_verify_callback(self._on_verify)
     
     def _on_state_change(self, boost: bool):
+        self.power_manager.reset_fan_verification()
         self.power_manager.apply_boost_mode(boost)
         self._update_icon()
+    
+    def _on_verify(self, is_boosted: bool):
+        self.power_manager.verify_fan_state(is_boosted)
     
     def _update_icon(self):
         if self._icon:

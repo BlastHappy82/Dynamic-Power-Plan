@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import logging
 import platform
+import filecmp
 from pathlib import Path
 from typing import Optional
 
@@ -15,6 +16,7 @@ class PowerManager:
     def __init__(self, config):
         self.config = config
         self._current_plan: Optional[str] = None
+        self._fan_state_verified = False
         self._setup_logging()
     
     def _setup_logging(self):
@@ -132,6 +134,8 @@ class PowerManager:
             shutil.copy2(source_file, target_path)
             logger.info(f"Copied fan config: {'MB_on' if boost else 'MB_off'} -> {target_file}")
             
+            self._update_status_file(target_path.parent, boost)
+            
             self._restart_lconnect_service()
             
             return True
@@ -139,6 +143,98 @@ class PowerManager:
         except Exception as e:
             logger.error(f"Error copying fan config: {e}")
             return False
+    
+    def _update_status_file(self, target_dir: Path, boost: bool):
+        on_file = target_dir / 'on'
+        off_file = target_dir / 'off'
+        
+        try:
+            if boost:
+                if off_file.exists():
+                    off_file.unlink()
+                on_file.touch()
+                logger.info("Status file set to: on")
+            else:
+                if on_file.exists():
+                    on_file.unlink()
+                off_file.touch()
+                logger.info("Status file set to: off")
+        except Exception as e:
+            logger.warning(f"Error updating status file: {e}")
+    
+    def verify_fan_state(self, is_boosted: bool) -> bool:
+        if not self.config.enable_fan_boost:
+            return True
+        
+        if self._fan_state_verified:
+            return True
+        
+        target_file = self.config.lconnect_target_file
+        if not target_file:
+            return True
+        
+        target_path = Path(target_file)
+        target_dir = target_path.parent
+        on_file = target_dir / 'on'
+        off_file = target_dir / 'off'
+        
+        has_on = on_file.exists()
+        has_off = off_file.exists()
+        
+        if has_on and has_off:
+            logger.warning("Both on/off status files found. Resolving by re-applying current desired state.")
+            result = self.copy_fan_config(is_boosted)
+            if result:
+                self._fan_state_verified = True
+            return result
+        
+        if not has_on and not has_off:
+            actual_state = self._detect_actual_fan_state(target_path)
+            if actual_state is None or actual_state != is_boosted:
+                logger.info(f"No status files found. Applying desired fan state ({'boost' if is_boosted else 'normal'}).")
+                result = self.copy_fan_config(is_boosted)
+            else:
+                self._update_status_file(target_dir, is_boosted)
+                result = True
+            if result:
+                self._fan_state_verified = True
+            return result
+        
+        if is_boosted and has_off and not has_on:
+            logger.info("Fan state mismatch detected: should be boost but status is off. Re-applying fan config.")
+            result = self.copy_fan_config(True)
+            if result:
+                self._fan_state_verified = True
+            return result
+        elif not is_boosted and has_on and not has_off:
+            logger.info("Fan state mismatch detected: should be normal but status is on. Re-applying fan config.")
+            result = self.copy_fan_config(False)
+            if result:
+                self._fan_state_verified = True
+            return result
+        
+        self._fan_state_verified = True
+        return True
+    
+    def _detect_actual_fan_state(self, target_path: Path) -> Optional[bool]:
+        if not target_path.exists():
+            return None
+        
+        try:
+            on_source = Path(self.config.mb_on_dir) / 'L-Connect-Service' if self.config.mb_on_dir else None
+            off_source = Path(self.config.mb_off_dir) / 'L-Connect-Service' if self.config.mb_off_dir else None
+            
+            if on_source and on_source.exists() and filecmp.cmp(str(target_path), str(on_source), shallow=False):
+                return True
+            if off_source and off_source.exists() and filecmp.cmp(str(target_path), str(off_source), shallow=False):
+                return False
+        except Exception as e:
+            logger.debug(f"Could not compare fan config files: {e}")
+        
+        return None
+    
+    def reset_fan_verification(self):
+        self._fan_state_verified = False
     
     def _restart_lconnect_service(self):
         service_name = self.config.lconnect_service_name
